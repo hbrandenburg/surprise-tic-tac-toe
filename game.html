@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5x5 Tic-Tac-Toe with Surprises</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #5f27cd;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .game-info {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #5f27cd;
+            text-align: center;
+        }
+        .timer {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #ff6b6b;
+            text-align: center;
+            font-weight: bold;
+        }
+        .timer.warning {
+            color: #ff4757;
+            animation: pulse-warning 1s infinite;
+        }
+        @keyframes pulse-warning {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 70px);
+            grid-template-rows: repeat(5, 70px);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 70px;
+            height: 70px;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, background-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .cell:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.05);
+        }
+        .x {
+            color: #ff69b4; /* Pink */
+        }
+        .o {
+            color: #ff1493; /* Deep pink */
+        }
+        .surprise-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #5f27cd;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            z-index: 200;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            animation: popup 0.5s ease-out;
+        }
+        @keyframes popup {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            80% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #5f27cd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #6c5ce7;
+            transform: scale(1.05);
+        }
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .game-container {
+            z-index: 10;
+            background-color: rgba(240, 248, 255, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .win-message {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+            min-height: 42px;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ffd700;
+            top: -10px;
+            animation: fall 3s ease-in infinite;
+        }
+        .surprise-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .cell.revealed .surprise-icon {
+            opacity: 1;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="confetti" id="confetti-container"></div>
+    <div class="game-container">
+        <h1>5x5 Surprise Tic-Tac-Toe!</h1>
+        <div class="subtitle">Find hidden surprises as you play! Get 4 in a row to win!</div>
+        <div class="timer" id="timer">Time Left: 1:00</div>
+        <div class="game-info" id="game-info">Player X's turn</div>
+        <div class="board" id="board">
+            <!-- Cells will be generated by JavaScript -->
+        </div>
+        <div class="win-message" id="win-message"></div>
+        <button id="reset-button">Play Again</button>
+    </div>
+
+    <script>
+        // Game variables
+        let currentPlayer = 'X';
+        let gameBoard = Array(25).fill('');
+        let gameActive = true;
+        let surpriseCells = [];
+        let timerInterval;
+        let timeLeft = 60; // 60 seconds = 1 minute
+        let surpriseMessages = {
+            'extraTurn': '🎁 Extra Turn! 🎁',
+            'skipTurn': '⏭️ Skip Turn! ⏭️',
+            'switchPlaces': '🔄 Switch Places! 🔄',
+            'removeOpponent': '❌ Remove Opponent Mark! ❌',
+            'safeSpot': '🛡️ Safe Spot! 🛡️',
+            'speedBoost': '⚡ Speed Boost! ⚡',
+            'timeFreeze': '❄️ Time Freeze! ❄️',
+            'colorSwap': '🎨 Color Swap! 🎨'
+        };
+        
+        // DOM elements
+        const board = document.getElementById('board');
+        const gameInfo = document.getElementById('game-info');
+        const winMessage = document.getElementById('win-message');
+        const resetButton = document.getElementById('reset-button');
+        const confettiContainer = document.getElementById('confetti-container');
+        const timerElement = document.getElementById('timer');
+        
+        // Initialize the board
+        function initializeBoard() {
+            // Generate random surprise cells (10 out of 25)
+            surpriseCells = [];
+            while (surpriseCells.length < 10) {
+                const randomIndex = Math.floor(Math.random() * 25);
+                if (!surpriseCells.includes(randomIndex)) {
+                    surpriseCells.push(randomIndex);
+                }
+            }
+            
+            // Assign random surprise types
+            const surpriseTypes = [
+                'extraTurn', 'skipTurn', 'switchPlaces', 'removeOpponent', 
+                'safeSpot', 'speedBoost', 'timeFreeze', 'colorSwap',
+                'extraTurn', 'removeOpponent' // Add some duplicates to fill out 10 spots
+            ];
+            const surprisesMap = {};
+            
+            for (let i = 0; i < surpriseCells.length; i++) {
+                surprisesMap[surpriseCells[i]] = surpriseTypes[i];
+            }
+            
+            // Create cells
+            board.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.setAttribute('data-index', i);
+                
+                // Add hidden surprise icon
+                if (surpriseCells.includes(i)) {
+                    const icon = document.createElement('div');
+                    icon.classList.add('surprise-icon');
+                    
+                    switch (surprisesMap[i]) {
+                        case 'extraTurn':
+                            icon.innerHTML = '🎁';
+                            break;
+                        case 'skipTurn':
+                            icon.innerHTML = '⏭️';
+                            break;
+                        case 'switchPlaces':
+                            icon.innerHTML = '🔄';
+                            break;
+                        case 'removeOpponent':
+                            icon.innerHTML = '❌';
+                            break;
+                        case 'safeSpot':
+                            icon.innerHTML = '🛡️';
+                            break;
+                        case 'speedBoost':
+                            icon.innerHTML = '⚡';
+                            break;
+                        case 'timeFreeze':
+                            icon.innerHTML = '❄️';
+                            break;
+                        case 'colorSwap':
+                            icon.innerHTML = '🎨';
+                            break;
+                    }
+                    
+                    cell.appendChild(icon);
+                    cell.setAttribute('data-surprise', surprisesMap[i]);
+                }
+                
+                board.appendChild(cell);
+            }
+            
+            // Add event listeners
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+            
+            // Start timer
+            startTimer();
+        }
+        
+        // Start the timer
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 10) {
+                    timerElement.classList.add('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGameWithTimeOut();
+                }
+            }, 1000);
+        }
+        
+        // Update timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+        
+        // End game when time runs out
+        function endGameWithTimeOut() {
+            gameActive = false;
+            
+            // Count markers to determine the winner
+            const xCount = gameBoard.filter(cell => cell === 'X').length;
+            const oCount = gameBoard.filter(cell => cell === 'O').length;
+            
+            if (xCount > oCount) {
+                winMessage.textContent = `Time's up! Player X wins! 🎉`;
+                createConfetti();
+            } else if (oCount > xCount) {
+                winMessage.textContent = `Time's up! Player O wins! 🎉`;
+                createConfetti();
+            } else {
+                winMessage.textContent = `Time's up! It's a draw! 🤝`;
+            }
+            
+            gameInfo.textContent = '';
+        }
+        
+        // Function to handle cell click
+        function handleCellClick(clickedCellEvent) {
+            const clickedCell = clickedCellEvent.target.closest('.cell');
+            if (!clickedCell || !gameActive) return;
+            
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            // Check if cell is already filled or game is not active
+            if (gameBoard[clickedCellIndex] !== '' || !gameActive) {
+                return;
+            }
+
+            // Update the cell and game board
+            gameBoard[clickedCellIndex] = currentPlayer;
+            clickedCell.textContent = currentPlayer;
+            clickedCell.classList.add(currentPlayer.toLowerCase());
+            
+            // Check if this cell has a surprise
+            const hasSurprise = surpriseCells.includes(clickedCellIndex);
+            if (hasSurprise) {
+                // Reveal the surprise
+                clickedCell.classList.add('revealed');
+                const surpriseType = clickedCell.getAttribute('data-surprise');
+                
+                // Show surprise message
+                showSurpriseMessage(surpriseType);
+                
+                // Apply surprise effect
+                setTimeout(() => {
+                    applySurpriseEffect(surpriseType, clickedCellIndex);
+                }, 1500);
+                
+                return; // Wait for surprise effect before continuing
+            }
+
+            // Continue regular game flow
+            continueGameFlow();
+        }
+        
+        // Function to show surprise message
+        function showSurpriseMessage(surpriseType) {
+            const message = document.createElement('div');
+            message.classList.add('surprise-message');
+            message.textContent = surpriseMessages[surpriseType];
+            document.body.appendChild(message);
+            
+            // Remove message after 1.5 seconds
+            setTimeout(() => {
+                document.body.removeChild(message);
+            }, 1500);
+        }
+        
+        // Function to apply surprise effect
+        function applySurpriseEffect(surpriseType, cellIndex) {
+            switch (surpriseType) {
+                case 'extraTurn':
+                    // Current player gets another turn
+                    gameInfo.textContent = `🎁 Player ${currentPlayer} gets an extra turn!`;
+                    continueGameFlow(true); // Keep same player
+                    break;
+                
+                case 'skipTurn':
+                    // Skip next player's turn
+                    const skippedPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    gameInfo.textContent = `⏭️ Player ${skippedPlayer}'s turn is skipped!`;
+                    continueGameFlow(true); // Keep same player
+                    break;
+                
+                case 'switchPlaces':
+                    // Randomly switch two pieces on the board
+                    const filledCells = [];
+                    for (let i = 0; i < gameBoard.length; i++) {
+                        if (gameBoard[i] !== '' && i !== cellIndex) {
+                            filledCells.push(i);
+                        }
+                    }
+                    
+                    if (filledCells.length > 0) {
+                        const randomCellIndex = filledCells[Math.floor(Math.random() * filledCells.length)];
+                        const randomCell = document.querySelector(`.cell[data-index="${randomCellIndex}"]`);
+                        
+                        // Swap the cell contents
+                        const tempSymbol = gameBoard[randomCellIndex];
+                        gameBoard[randomCellIndex] = currentPlayer;
+                        gameBoard[cellIndex] = tempSymbol;
+                        
+                        // Update display
+                        randomCell.textContent = currentPlayer;
+                        randomCell.className = 'cell ' + currentPlayer.toLowerCase();
+                        
+                        const currentCell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
+                        currentCell.textContent = tempSymbol;
+                        currentCell.className = 'cell ' + tempSymbol.toLowerCase();
+                        
+                        gameInfo.textContent = `🔄 Pieces switched!`;
+                    }
+                    
+                    setTimeout(() => {
+                        continueGameFlow();
+                    }, 1000);
+                    break;
+                
+                case 'removeOpponent':
+                    // Remove a random opponent's mark
+                    const opponentSymbol = currentPlayer === 'X' ? 'O' : 'X';
+                    const opponentCells = [];
+                    for (let i = 0; i < gameBoard.length; i++) {
+                        if (gameBoard[i] === opponentSymbol) {
+                            opponentCells.push(i);
+                        }
+                    }
+                    
+                    if (opponentCells.length > 0) {
+                        const randomOpponentCellIndex = opponentCells[Math.floor(Math.random() * opponentCells.length)];
+                        gameBoard[randomOpponentCellIndex] = '';
+                        
+                        // Update display
+                        const cellToRemove = document.querySelector(`.cell[data-index="${randomOpponentCellIndex}"]`);
+                        cellToRemove.textContent = '';
+                        cellToRemove.className = 'cell';
+                        
+                        gameInfo.textContent = `❌ Removed an opponent's mark!`;
+                    }
+                    
+                    setTimeout(() => {
+                        continueGameFlow();
+                    }, 1000);
+                    break;
+                
+                case 'safeSpot':
+                    // This cell can't be switched or removed
+                    gameInfo.textContent = `🛡️ This spot is now protected!`;
+                    continueGameFlow();
+                    break;
+                
+                case 'speedBoost':
+                    // Add 10 seconds to the timer permanently
+                    timeLeft += 10;
+                    updateTimerDisplay();
+                    // Remove warning class if we're back above 10 seconds
+                    if (timeLeft > 10) {
+                        timerElement.classList.remove('warning');
+                    }
+                    gameInfo.textContent = `⚡ 10 seconds added to the timer!`;
+                    continueGameFlow();
+                    break;
+                
+                case 'timeFreeze':
+                    // Pause the timer for 5 seconds
+                    clearInterval(timerInterval);
+                    gameInfo.textContent = `❄️ Timer frozen for 5 seconds!`;
+                    
+                    setTimeout(() => {
+                        // Resume timer after 5 seconds
+                        timerInterval = setInterval(() => {
+                            timeLeft--;
+                            updateTimerDisplay();
+                            
+                            if (timeLeft <= 10) {
+                                timerElement.classList.add('warning');
+                            }
+                            
+                            if (timeLeft <= 0) {
+                                clearInterval(timerInterval);
+                                endGameWithTimeOut();
+                            }
+                        }, 1000);
+                        
+                        continueGameFlow();
+                    }, 5000);
+                    break;
+                
+                case 'colorSwap':
+                    // Swap X and O colors temporarily
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        .x { color: #ff1493 !important; }
+                        .o { color: #ff69b4 !important; }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    gameInfo.textContent = `🎨 Colors swapped!`;
+                    
+                    setTimeout(() => {
+                        document.head.removeChild(style);
+                        continueGameFlow();
+                    }, 5000);
+                    break;
+                
+                default:
+                    continueGameFlow();
+                    break;
+            }
+        }
+        
+        // Continue normal game flow
+        function continueGameFlow(keepSamePlayer = false) {
+            // Check for win or draw
+            if (checkWin()) {
+                gameActive = false;
+                clearInterval(timerInterval);
+                winMessage.textContent = `Player ${currentPlayer} wins! 🎉`;
+                gameInfo.textContent = '';
+                createConfetti();
+                return;
+            }
+
+            if (checkDraw()) {
+                gameActive = false;
+                clearInterval(timerInterval);
+                winMessage.textContent = "It's a draw! 🤝";
+                gameInfo.textContent = '';
+                return;
+            }
+
+            // Switch player unless specified to keep the same player
+            if (!keepSamePlayer) {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+            gameInfo.textContent = `Player ${currentPlayer}'s turn`;
+        }
+
+        // Function to check for 4 in a row in any direction
+        function checkWin() {
+            const size = 5; // 5x5 grid
+            const winLength = 4; // Need 4 in a row to win
+            
+            // Check for winner
+            for (let row = 0; row < size; row++) {
+                for (let col = 0; col < size; col++) {
+                    const index = row * size + col;
+                    const currentSymbol = gameBoard[index];
+                    
+                    if (!currentSymbol) continue; // Skip empty cells
+                    
+                    // Check right (horizontal)
+                    if (col <= size - winLength) {
+                        let horizontal = true;
+                        let indices = [index];
+                        
+                        for (let i = 1; i < winLength; i++) {
+                            indices.push(index + i);
+                            if (gameBoard[index + i] !== currentSymbol) {
+                                horizontal = false;
+                                break;
+                            }
+                        }
+                        
+                        if (horizontal) {
+                            highlightWinningCells(indices);
+                            return true;
+                        }
+                    }
+                    
+                    // Check down (vertical)
+                    if (row <= size - winLength) {
+                        let vertical = true;
+                        let indices = [index];
+                        
+                        for (let i = 1; i < winLength; i++) {
+                            indices.push(index + i * size);
+                            if (gameBoard[index + i * size] !== currentSymbol) {
+                                vertical = false;
+                                break;
+                            }
+                        }
+                        
+                        if (vertical) {
+                            highlightWinningCells(indices);
+                            return true;
+                        }
+                    }
+                    
+                    // Check diagonal down-right
+                    if (row <= size - winLength && col <= size - winLength) {
+                        let diagonal = true;
+                        let indices = [index];
+                        
+                        for (let i = 1; i < winLength; i++) {
+                            indices.push(index + i * size + i);
+                            if (gameBoard[index + i * size + i] !== currentSymbol) {
+                                diagonal = false;
+                                break;
+                            }
+                        }
+                        
+                        if (diagonal) {
+                            highlightWinningCells(indices);
+                            return true;
+                        }
+                    }
+                    
+                    // Check diagonal down-left
+                    if (row <= size - winLength && col >= winLength - 1) {
+                        let diagonal = true;
+                        let indices = [index];
+                        
+                        for (let i = 1; i < winLength; i++) {
+                            indices.push(index + i * size - i);
+                            if (gameBoard[index + i * size - i] !== currentSymbol) {
+                                diagonal = false;
+                                break;
+                            }
+                        }
+                        
+                        if (diagonal) {
+                            highlightWinningCells(indices);
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // Function to highlight winning cells
+        function highlightWinningCells(indices) {
+            const cells = document.querySelectorAll('.cell');
+            indices.forEach(index => {
+                cells[index].style.backgroundColor = '#d4fc79';
+            });
+        }
+
+        // Function to check for a draw
+        function checkDraw() {
+            return !gameBoard.includes('');
+        }
+
+        // Function to create confetti
+        function createConfetti() {
+            confettiContainer.innerHTML = '';
+            const colors = ['#ff69b4', '#ff1493', '#48dbfb', '#ffd700', '#32ff7e', '#7d5fff'];
+            
+            for (let i = 0; i < 200; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti-piece');
+                
+                // Random styling
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                confetti.style.opacity = Math.random() + 0.5;
+                
+                // Random animation
+                const animationDuration = (Math.random() * 3 + 2) + 's';
+                const animationDelay = (Math.random() * 2) + 's';
+                
+                confetti.style.animation = `fall ${animationDuration} ease-in infinite`;
+                confetti.style.animationDelay = animationDelay;
+                
+                confettiContainer.appendChild(confetti);
+            }
+            
+            // Add keyframe animation
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes fall {
+                    0% { transform: translateY(0) rotate(0deg); }
+                    100% { transform: translateY(100vh) rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Function to reset the game
+        function resetGame() {
+            currentPlayer = 'X';
+            gameBoard = Array(25).fill('');
+            gameActive = true;
+            winMessage.textContent = '';
+            gameInfo.textContent = `Player ${currentPlayer}'s turn`;
+            confettiContainer.innerHTML = '';
+            timerElement.classList.remove('warning');
+            
+            // Reinitialize the board with new surprises
+            initializeBoard();
+        }
+
+        // Add event listener to reset button
+        resetButton.addEventListener('click', resetGame);
+        
+        // Initialize the game
+        initializeBoard();
+    </script>
+</body>
+</html>
