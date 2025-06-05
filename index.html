@@ -2,725 +2,1632 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5x5 Tic-Tac-Toe with Surprises</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="5x5 Surprise Tic-Tac-Toe - Mobile game with hidden power-ups">
+    <title>5x5 Surprise Tic-Tac-Toe!</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff69b4">
+    
     <style>
+        /* Mobile-First Design with Restaurant Optimization */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
         body {
             font-family: 'Comic Sans MS', cursive, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f0f8ff;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            color: #2c3e50;
+            text-align: center;
+            padding: 8px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
+        
+        /* High contrast for restaurant lighting */
         h1 {
-            color: #ff6b6b;
-            text-align: center;
-            margin-bottom: 10px;
+            color: #ff1493;
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: 900;
         }
+        
         .subtitle {
-            color: #5f27cd;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-        .game-info {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #5f27cd;
-            text-align: center;
-        }
-        .timer {
-            font-size: 28px;
+            color: #34495e;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
             margin-bottom: 15px;
-            color: #ff6b6b;
-            text-align: center;
-            font-weight: bold;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
-        .timer.warning {
-            color: #ff4757;
-            animation: pulse-warning 1s infinite;
+        
+        .game-container {
+            max-width: min(95vw, 420px);
+            margin: 0 auto;
+            padding: 0 4px;
         }
-        @keyframes pulse-warning {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        
+        /* Prominent timer display */
+        .timer {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 900;
+            color: #ff69b4;
+            margin-bottom: 12px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
         }
-        .board {
+        
+        /* Responsive 5x5 grid that scales properly */
+        .game-board {
             display: grid;
-            grid-template-columns: repeat(5, 70px);
-            grid-template-rows: repeat(5, 70px);
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(2px, 0.5vw, 4px);
+            margin: 15px auto 20px;
+            background: linear-gradient(45deg, #d1d8e0, #a8b3c5);
+            padding: clamp(3px, 1vw, 6px);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: min(95vw, 380px);
+            aspect-ratio: 1;
         }
+        
+        /* Optimized touch targets (minimum 44px) */
         .cell {
-            width: 70px;
-            height: 70px;
-            background-color: white;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: none;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: 900;
+            cursor: pointer;
+            touch-action: manipulation;
+            min-height: max(44px, 12vw);
+            min-width: max(44px, 12vw);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, background-color 0.3s;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
         }
-        .cell:hover {
-            background-color: #f0f0f0;
-            transform: scale(1.05);
+        
+        /* Enhanced touch feedback */
+        .cell:hover, .cell:focus {
+            background: linear-gradient(135deg, #ffe4e1 0%, #ffb6c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 105, 180, 0.3);
         }
-        .x {
-            color: #ff69b4; /* Pink */
+        
+        .cell:active {
+            transform: scale(0.92) translateY(0);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .o {
-            color: #ff1493; /* Deep pink */
+        
+        /* Touch ripple effect */
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 105, 180, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
         }
-        .surprise-message {
+        
+        .cell:active::before {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .game-info {
+            margin-bottom: 18px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: 700;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* Touch-optimized button */
+        .reset-btn {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            min-height: 48px;
+            min-width: 120px;
+            box-shadow: 0 6px 20px rgba(255, 20, 147, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            touch-action: manipulation;
+        }
+        
+        .reset-btn:hover, .reset-btn:focus {
+            background: linear-gradient(135deg, #ff1493 0%, #dc143c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 20, 147, 0.4);
+        }
+        
+        .reset-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+        }
+        
+        /* Surprise popup styles */
+        .surprise-popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #5f27cd;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
             color: white;
             padding: 20px;
-            border-radius: 10px;
-            font-size: 24px;
-            z-index: 200;
+            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            animation: popup 0.5s ease-out;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: popupAppear 0.5s ease-out;
+            max-width: 300px;
+            min-width: 250px;
         }
-        @keyframes popup {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            80% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
+        
+        .surprise-popup h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.4rem;
         }
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            background-color: #5f27cd;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            transition: background-color 0.3s, transform 0.2s;
+        
+        .surprise-popup p {
+            margin: 0;
+            font-size: 1rem;
         }
-        button:hover {
-            background-color: #6c5ce7;
-            transform: scale(1.05);
-        }
-        .confetti {
+        
+        .popup-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 100;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            animation: fadeIn 0.3s ease-out;
         }
-        .game-container {
-            z-index: 10;
-            background-color: rgba(240, 248, 255, 0.8);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        
+        .cell.has-surprise {
+            background: linear-gradient(45deg, #ffe4e1, #ffb6c1);
         }
-        .win-message {
-            font-size: 28px;
-            font-weight: bold;
-            margin: 10px 0;
-            text-align: center;
-            min-height: 42px;
+        
+        .cell.surprise-revealed {
+            background: linear-gradient(45deg, #ffd700, #ffec8c);
+            animation: surpriseReveal 0.6s ease-out;
         }
-        .confetti-piece {
-            position: absolute;
+        
+        .cell.safe-spot {
+            box-shadow: 0 0 0 3px #32cd32;
+        }
+        
+        .cell.frozen {
+            background: linear-gradient(45deg, #87ceeb, #add8e6);
+        }
+        
+        @keyframes popupAppear {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.7);
+                opacity: 0;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes surpriseReveal {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Enhanced Animation System */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes winningCell {
+            0% { 
+                background: linear-gradient(135deg, #32cd32 0%, #90ee90 100%);
+                transform: scale(1);
+            }
+            50% { 
+                background: linear-gradient(135deg, #00ff00 0%, #98fb98 100%);
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(50, 205, 50, 0.6);
+            }
+            100% { 
+                background: linear-gradient(135deg, #32cd32 0%, #90ee90 100%);
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pieceAppear {
+            0% { 
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.2) rotate(90deg);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes timerWarning {
+            0% { 
+                color: #ff0000;
+                text-shadow: 3px 3px 6px rgba(255, 0, 0, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                color: #ff6666;
+                text-shadow: 5px 5px 10px rgba(255, 0, 0, 0.8);
+                transform: scale(1.05);
+            }
+            100% { 
+                color: #ff0000;
+                text-shadow: 3px 3px 6px rgba(255, 0, 0, 0.3);
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes colorSwapGlow {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(255, 105, 180, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            }
+        }
+        
+        @keyframes freezeEffect {
+            0% { 
+                background: linear-gradient(45deg, #87ceeb, #add8e6);
+                transform: scale(1);
+            }
+            25% { 
+                background: linear-gradient(45deg, #b0e0e6, #87cefa);
+                transform: scale(1.02);
+            }
+            50% { 
+                background: linear-gradient(45deg, #87ceeb, #add8e6);
+                transform: scale(1);
+            }
+            75% { 
+                background: linear-gradient(45deg, #b0e0e6, #87cefa);
+                transform: scale(1.02);
+            }
+            100% { 
+                background: linear-gradient(45deg, #87ceeb, #add8e6);
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            70% {
+                transform: scale(0.9);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
             width: 10px;
             height: 10px;
-            background-color: #ffd700;
-            top: -10px;
-            animation: fall 3s ease-in infinite;
+            background: #ff69b4;
+            pointer-events: none;
+            z-index: 1001;
+            border-radius: 50%;
         }
-        .surprise-icon {
-            position: absolute;
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Win Message Animation */
+        .win-message {
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 16px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            background: linear-gradient(135deg, #ff69b4, #ff1493, #ffd700);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 900;
+            text-align: center;
+            z-index: 1002;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        .cell.revealed .surprise-icon {
-            opacity: 1;
-            animation: pulse 1s infinite;
+        
+        /* Enhanced cell states */
+        .cell.placing {
+            animation: pieceAppear 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
-            100% { transform: translate(-50%, -50%) scale(1); }
+        
+        .cell.winning {
+            animation: winningCell 1s ease-in-out infinite;
+            z-index: 10;
+        }
+        
+        .cell.color-swapping {
+            animation: colorSwapGlow 0.5s ease-in-out;
+        }
+        
+        .timer.warning {
+            animation: timerWarning 1s ease-in-out infinite;
+        }
+        
+        .timer.frozen {
+            animation: freezeEffect 2s ease-in-out infinite;
+        }
+        
+        /* Instructions Styling */
+        .instructions {
+            margin: 15px auto 20px;
+            max-width: min(90vw, 400px);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .instructions-toggle {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            padding: 12px 20px;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: center;
+            list-style: none;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            min-height: 44px;
+        }
+        
+        .instructions-toggle:hover {
+            background: linear-gradient(135deg, #ff1493 0%, #dc143c 100%);
+            transform: translateY(-1px);
+        }
+        
+        .instructions-toggle::-webkit-details-marker {
+            display: none;
+        }
+        
+        .instructions-content {
+            padding: 20px;
+            background: white;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .instructions-content h3 {
+            color: #ff1493;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin: 15px 0 8px 0;
+            font-weight: 800;
+        }
+        
+        .instructions-content h3:first-child {
+            margin-top: 0;
+        }
+        
+        .instructions-content p {
+            color: #2c3e50;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        
+        .instructions-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0;
+        }
+        
+        .instructions-content li {
+            color: #34495e;
+            font-size: clamp(0.75rem, 2.3vw, 0.85rem);
+            line-height: 1.3;
+            margin: 6px 0;
+            padding-left: 8px;
+        }
+        
+        .instructions-content strong {
+            color: #ff1493;
+            font-weight: 700;
+        }
+        
+        @keyframes slideDown {
+            0% {
+                max-height: 0;
+                opacity: 0;
+            }
+            100% {
+                max-height: 500px;
+                opacity: 1;
+            }
+        }
+        
+        /* Game Status Enhancement */
+        .game-status {
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+        
+        /* Comprehensive Responsive Design */
+        
+        /* Mobile Portrait: 320px - 480px */
+        @media (max-width: 480px) {
+            body {
+                padding: 4px;
+            }
+            
+            .game-container {
+                padding: 0 2px;
+            }
+            
+            h1 {
+                font-size: clamp(1.3rem, 6vw, 1.6rem);
+                margin-bottom: 6px;
+            }
+            
+            .subtitle {
+                font-size: clamp(0.75rem, 3vw, 0.9rem);
+                margin-bottom: 12px;
+            }
+            
+            .timer {
+                font-size: clamp(1.8rem, 10vw, 2.8rem);
+                margin-bottom: 10px;
+            }
+            
+            .game-board {
+                width: min(92vw, 320px);
+                margin: 12px auto 16px;
+                gap: 2px;
+                padding: 3px;
+            }
+            
+            .cell {
+                min-height: max(50px, 15vw);
+                min-width: max(50px, 15vw);
+                font-size: clamp(1.1rem, 5vw, 1.4rem);
+                border-radius: 6px;
+            }
+            
+            .game-info {
+                font-size: clamp(0.9rem, 4vw, 1.1rem);
+                margin-bottom: 16px;
+            }
+            
+            .reset-btn {
+                padding: 14px 28px;
+                font-size: clamp(0.9rem, 4vw, 1.1rem);
+                min-height: 46px;
+            }
+            
+            .surprise-popup {
+                max-width: 280px;
+                min-width: 220px;
+                padding: 15px;
+            }
+        }
+        
+        /* Mobile Landscape: 480px - 768px */
+        @media (min-width: 481px) and (max-width: 768px) {
+            body {
+                padding: 6px;
+            }
+            
+            .game-container {
+                max-width: min(90vw, 450px);
+            }
+            
+            .timer {
+                font-size: clamp(2.2rem, 6vw, 3rem);
+            }
+            
+            .game-board {
+                width: min(85vw, 400px);
+            }
+            
+            .cell {
+                min-height: max(48px, 10vw);
+                min-width: max(48px, 10vw);
+            }
+        }
+        
+        /* Landscape Orientation Optimizations */
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                padding: 4px 8px;
+                min-height: auto;
+            }
+            
+            .game-container {
+                max-width: min(60vw, 350px);
+            }
+            
+            h1 {
+                font-size: clamp(1.2rem, 3vh, 1.6rem);
+                margin-bottom: 4px;
+            }
+            
+            .subtitle {
+                font-size: clamp(0.7rem, 2vh, 0.9rem);
+                margin-bottom: 8px;
+            }
+            
+            .timer {
+                font-size: clamp(1.5rem, 5vh, 2.2rem);
+                margin-bottom: 8px;
+            }
+            
+            .game-board {
+                width: min(45vh, 320px);
+                margin: 8px auto 12px;
+            }
+            
+            .cell {
+                min-height: max(40px, 8vh);
+                min-width: max(40px, 8vh);
+                font-size: clamp(1rem, 3vh, 1.3rem);
+            }
+            
+            .game-info {
+                margin-bottom: 12px;
+                font-size: clamp(0.8rem, 2.5vh, 1rem);
+            }
+            
+            .reset-btn {
+                padding: 12px 24px;
+                font-size: clamp(0.8rem, 2.5vh, 1rem);
+                min-height: 42px;
+            }
+        }
+        
+        /* Tablet: 768px - 1024px */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .game-container {
+                max-width: 500px;
+            }
+            
+            .game-board {
+                width: min(70vw, 450px);
+            }
+            
+            .cell {
+                min-height: max(56px, 8vw);
+                min-width: max(56px, 8vw);
+                font-size: clamp(1.4rem, 3vw, 1.8rem);
+            }
+        }
+        
+        /* Desktop: 1024px+ */
+        @media (min-width: 1025px) {
+            .game-container {
+                max-width: 520px;
+            }
+            
+            .game-board {
+                width: 420px;
+            }
+            
+            .cell {
+                min-height: 70px;
+                min-width: 70px;
+                font-size: 1.8rem;
+            }
+            
+            /* Re-enable hover effects for desktop */
+            .cell:hover {
+                background: linear-gradient(135deg, #ffe4e1 0%, #ffb6c1 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(255, 105, 180, 0.3);
+            }
+            
+            .reset-btn:hover {
+                background: linear-gradient(135deg, #ff1493 0%, #dc143c 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(255, 20, 147, 0.4);
+            }
+        }
+        
+        /* High DPI Displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .timer {
+                text-shadow: 4px 4px 8px rgba(0,0,0,0.25);
+            }
+            
+            h1 {
+                text-shadow: 3px 3px 6px rgba(0,0,0,0.15);
+            }
+            
+            .cell {
+                box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="confetti" id="confetti-container"></div>
     <div class="game-container">
-        <h1>5x5 Surprise Tic-Tac-Toe!</h1>
-        <div class="subtitle">Find hidden surprises as you play! Get 4 in a row to win!</div>
-        <div class="timer" id="timer">Time Left: 1:00</div>
-        <div class="game-info" id="game-info">Player X's turn</div>
-        <div class="board" id="board">
-            <!-- Cells will be generated by JavaScript -->
+        <h1 id="game-title">5x5 Surprise Tic-Tac-Toe!</h1>
+        <p class="subtitle" id="game-description">Find hidden surprises as you play! Get 4 in a row to win!</p>
+        
+        <div class="timer" role="timer" aria-live="polite" aria-label="Game timer">60</div>
+        
+        <div class="game-info">
+            <div class="current-player" role="status" aria-live="polite" id="current-player">Player X's turn</div>
+            <div class="game-status" role="status" aria-live="polite"></div>
         </div>
-        <div class="win-message" id="win-message"></div>
-        <button id="reset-button">Play Again</button>
+        
+        <!-- Collapsible Instructions -->
+        <details class="instructions" role="region" aria-labelledby="instructions-heading">
+            <summary class="instructions-toggle" id="instructions-heading" aria-expanded="false">How to Play ▼</summary>
+            <div class="instructions-content" role="region" aria-labelledby="instructions-heading">
+                <h3>🎯 Goal</h3>
+                <p>Get 4 pieces in a row (horizontal, vertical, or diagonal) within 60 seconds!</p>
+                
+                <h3>🎁 Surprises</h3>
+                <p>40% of cells contain hidden power-ups:</p>
+                <ul>
+                    <li><strong>🎁 Extra Turn</strong> - Play again immediately</li>
+                    <li><strong>⏭️ Skip Turn</strong> - Opponent misses next turn</li>
+                    <li><strong>🔄 Switch Places</strong> - Swap with opponent piece</li>
+                    <li><strong>❌ Remove Opponent</strong> - Delete opponent piece</li>
+                    <li><strong>🛡️ Safe Spot</strong> - Protect this piece</li>
+                    <li><strong>⚡ Speed Boost</strong> - Add 10 seconds</li>
+                    <li><strong>❄️ Time Freeze</strong> - Pause timer 5 seconds</li>
+                    <li><strong>🎨 Color Swap</strong> - Temporarily swap colors</li>
+                </ul>
+                
+                <h3>⏰ Timer</h3>
+                <p>If time runs out, player with more pieces wins!</p>
+            </div>
+        </details>
+        
+        <div class="game-board" role="grid" aria-label="5x5 Tic-Tac-Toe game board" aria-describedby="game-description">
+            <!-- 25 cells for 5x5 grid -->
+            <button class="cell" data-index="0" role="gridcell" aria-label="Cell 1 (row 1, column 1)" tabindex="0"></button>
+            <button class="cell" data-index="1" role="gridcell" aria-label="Cell 2 (row 1, column 2)"></button>
+            <button class="cell" data-index="2" role="gridcell" aria-label="Cell 3 (row 1, column 3)"></button>
+            <button class="cell" data-index="3" role="gridcell" aria-label="Cell 4 (row 1, column 4)"></button>
+            <button class="cell" data-index="4" role="gridcell" aria-label="Cell 5 (row 1, column 5)"></button>
+            <button class="cell" data-index="5" role="gridcell" aria-label="Cell 6 (row 2, column 1)"></button>
+            <button class="cell" data-index="6" role="gridcell" aria-label="Cell 7 (row 2, column 2)"></button>
+            <button class="cell" data-index="7" role="gridcell" aria-label="Cell 8 (row 2, column 3)"></button>
+            <button class="cell" data-index="8" role="gridcell" aria-label="Cell 9 (row 2, column 4)"></button>
+            <button class="cell" data-index="9" role="gridcell" aria-label="Cell 10 (row 2, column 5)"></button>
+            <button class="cell" data-index="10" role="gridcell" aria-label="Cell 11 (row 3, column 1)"></button>
+            <button class="cell" data-index="11" role="gridcell" aria-label="Cell 12 (row 3, column 2)"></button>
+            <button class="cell" data-index="12" role="gridcell" aria-label="Cell 13 (row 3, column 3)"></button>
+            <button class="cell" data-index="13" role="gridcell" aria-label="Cell 14 (row 3, column 4)"></button>
+            <button class="cell" data-index="14" role="gridcell" aria-label="Cell 15 (row 3, column 5)"></button>
+            <button class="cell" data-index="15" role="gridcell" aria-label="Cell 16 (row 4, column 1)"></button>
+            <button class="cell" data-index="16" role="gridcell" aria-label="Cell 17 (row 4, column 2)"></button>
+            <button class="cell" data-index="17" role="gridcell" aria-label="Cell 18 (row 4, column 3)"></button>
+            <button class="cell" data-index="18" role="gridcell" aria-label="Cell 19 (row 4, column 4)"></button>
+            <button class="cell" data-index="19" role="gridcell" aria-label="Cell 20 (row 4, column 5)"></button>
+            <button class="cell" data-index="20" role="gridcell" aria-label="Cell 21 (row 5, column 1)"></button>
+            <button class="cell" data-index="21" role="gridcell" aria-label="Cell 22 (row 5, column 2)"></button>
+            <button class="cell" data-index="22" role="gridcell" aria-label="Cell 23 (row 5, column 3)"></button>
+            <button class="cell" data-index="23" role="gridcell" aria-label="Cell 24 (row 5, column 4)"></button>
+            <button class="cell" data-index="24" role="gridcell" aria-label="Cell 25 (row 5, column 5)"></button>
+        </div>
+        
+        <button class="reset-btn" aria-label="Reset game and start over">Play Again</button>
     </div>
 
     <script>
-        // Game variables
-        let currentPlayer = 'X';
-        let gameBoard = Array(25).fill('');
-        let gameActive = true;
-        let surpriseCells = [];
-        let timerInterval;
-        let timeLeft = 60; // 60 seconds = 1 minute
-        let surpriseMessages = {
-            'extraTurn': '🎁 Extra Turn! 🎁',
-            'skipTurn': '⏭️ Skip Turn! ⏭️',
-            'switchPlaces': '🔄 Switch Places! 🔄',
-            'removeOpponent': '❌ Remove Opponent Mark! ❌',
-            'safeSpot': '🛡️ Safe Spot! 🛡️',
-            'speedBoost': '⚡ Speed Boost! ⚡',
-            'timeFreeze': '❄️ Time Freeze! ❄️',
-            'colorSwap': '🎨 Color Swap! 🎨'
-        };
-        
-        // DOM elements
-        const board = document.getElementById('board');
-        const gameInfo = document.getElementById('game-info');
-        const winMessage = document.getElementById('win-message');
-        const resetButton = document.getElementById('reset-button');
-        const confettiContainer = document.getElementById('confetti-container');
-        const timerElement = document.getElementById('timer');
-        
-        // Initialize the board
-        function initializeBoard() {
-            // Generate random surprise cells (10 out of 25)
-            surpriseCells = [];
-            while (surpriseCells.length < 10) {
-                const randomIndex = Math.floor(Math.random() * 25);
-                if (!surpriseCells.includes(randomIndex)) {
-                    surpriseCells.push(randomIndex);
-                }
+        class SurpriseManager {
+            constructor() {
+                this.surprises = [];
+                this.powerUpTypes = [
+                    { type: 'extra-turn', emoji: '🎁', name: 'Extra Turn', description: 'You get another turn!' },
+                    { type: 'skip-turn', emoji: '⏭️', name: 'Skip Turn', description: 'Opponent misses their next turn!' },
+                    { type: 'switch-places', emoji: '🔄', name: 'Switch Places', description: 'Your piece swaps with a random opponent piece!' },
+                    { type: 'remove-opponent', emoji: '❌', name: 'Remove Opponent', description: 'Random opponent piece removed!' },
+                    { type: 'safe-spot', emoji: '🛡️', name: 'Safe Spot', description: 'This piece is protected!' },
+                    { type: 'speed-boost', emoji: '⚡', name: 'Speed Boost', description: '+10 seconds added to timer!' },
+                    { type: 'time-freeze', emoji: '❄️', name: 'Time Freeze', description: 'Timer paused for 5 seconds!' },
+                    { type: 'color-swap', emoji: '🎨', name: 'Color Swap', description: 'Colors swapped for 5 seconds!' }
+                ];
+                this.activeEffects = new Set();
             }
             
-            // Assign random surprise types
-            const surpriseTypes = [
-                'extraTurn', 'skipTurn', 'switchPlaces', 'removeOpponent', 
-                'safeSpot', 'speedBoost', 'timeFreeze', 'colorSwap',
-                'extraTurn', 'removeOpponent' // Add some duplicates to fill out 10 spots
-            ];
-            const surprisesMap = {};
-            
-            for (let i = 0; i < surpriseCells.length; i++) {
-                surprisesMap[surpriseCells[i]] = surpriseTypes[i];
-            }
-            
-            // Create cells
-            board.innerHTML = '';
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.setAttribute('data-index', i);
+            generateSurprises() {
+                this.surprises = [];
+                const positions = new Set();
                 
-                // Add hidden surprise icon
-                if (surpriseCells.includes(i)) {
-                    const icon = document.createElement('div');
-                    icon.classList.add('surprise-icon');
-                    
-                    switch (surprisesMap[i]) {
-                        case 'extraTurn':
-                            icon.innerHTML = '🎁';
-                            break;
-                        case 'skipTurn':
-                            icon.innerHTML = '⏭️';
-                            break;
-                        case 'switchPlaces':
-                            icon.innerHTML = '🔄';
-                            break;
-                        case 'removeOpponent':
-                            icon.innerHTML = '❌';
-                            break;
-                        case 'safeSpot':
-                            icon.innerHTML = '🛡️';
-                            break;
-                        case 'speedBoost':
-                            icon.innerHTML = '⚡';
-                            break;
-                        case 'timeFreeze':
-                            icon.innerHTML = '❄️';
-                            break;
-                        case 'colorSwap':
-                            icon.innerHTML = '🎨';
-                            break;
-                    }
-                    
-                    cell.appendChild(icon);
-                    cell.setAttribute('data-surprise', surprisesMap[i]);
+                // Generate 10 unique random positions (40% of 25 cells)
+                while (positions.size < 10) {
+                    positions.add(Math.floor(Math.random() * 25));
                 }
                 
-                board.appendChild(cell);
+                positions.forEach(position => {
+                    const randomType = this.powerUpTypes[Math.floor(Math.random() * this.powerUpTypes.length)];
+                    this.surprises.push({
+                        position: position,
+                        type: randomType.type,
+                        emoji: randomType.emoji,
+                        name: randomType.name,
+                        description: randomType.description,
+                        revealed: false
+                    });
+                });
+                
+                return this.surprises;
             }
             
-            // Add event listeners
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.addEventListener('click', handleCellClick);
-            });
+            hasSurpriseAt(position) {
+                return this.surprises.find(s => s.position === position && !s.revealed);
+            }
             
-            // Start timer
-            startTimer();
-        }
-        
-        // Start the timer
-        function startTimer() {
-            clearInterval(timerInterval);
-            timeLeft = 60;
-            updateTimerDisplay();
-            
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                
-                if (timeLeft <= 10) {
-                    timerElement.classList.add('warning');
+            revealSurpriseAt(position) {
+                const surprise = this.hasSurpriseAt(position);
+                if (surprise) {
+                    surprise.revealed = true;
+                    return surprise;
                 }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    endGameWithTimeOut();
-                }
-            }, 1000);
-        }
-        
-        // Update timer display
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-        
-        // End game when time runs out
-        function endGameWithTimeOut() {
-            gameActive = false;
-            
-            // Count markers to determine the winner
-            const xCount = gameBoard.filter(cell => cell === 'X').length;
-            const oCount = gameBoard.filter(cell => cell === 'O').length;
-            
-            if (xCount > oCount) {
-                winMessage.textContent = `Time's up! Player X wins! 🎉`;
-                createConfetti();
-            } else if (oCount > xCount) {
-                winMessage.textContent = `Time's up! Player O wins! 🎉`;
-                createConfetti();
-            } else {
-                winMessage.textContent = `Time's up! It's a draw! 🤝`;
+                return null;
             }
             
-            gameInfo.textContent = '';
-        }
-        
-        // Function to handle cell click
-        function handleCellClick(clickedCellEvent) {
-            const clickedCell = clickedCellEvent.target.closest('.cell');
-            if (!clickedCell || !gameActive) return;
-            
-            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-
-            // Check if cell is already filled or game is not active
-            if (gameBoard[clickedCellIndex] !== '' || !gameActive) {
-                return;
-            }
-
-            // Update the cell and game board
-            gameBoard[clickedCellIndex] = currentPlayer;
-            clickedCell.textContent = currentPlayer;
-            clickedCell.classList.add(currentPlayer.toLowerCase());
-            
-            // Check if this cell has a surprise
-            const hasSurprise = surpriseCells.includes(clickedCellIndex);
-            if (hasSurprise) {
-                // Reveal the surprise
-                clickedCell.classList.add('revealed');
-                const surpriseType = clickedCell.getAttribute('data-surprise');
+            showSurprisePopup(surprise) {
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'popup-overlay';
                 
-                // Show surprise message
-                showSurpriseMessage(surpriseType);
+                // Create popup
+                const popup = document.createElement('div');
+                popup.className = 'surprise-popup';
+                popup.innerHTML = `
+                    <h3>${surprise.emoji} ${surprise.name}</h3>
+                    <p>${surprise.description}</p>
+                `;
                 
-                // Apply surprise effect
+                document.body.appendChild(overlay);
+                document.body.appendChild(popup);
+                
+                // Auto-remove after 2 seconds
                 setTimeout(() => {
-                    applySurpriseEffect(surpriseType, clickedCellIndex);
-                }, 1500);
-                
-                return; // Wait for surprise effect before continuing
+                    overlay.remove();
+                    popup.remove();
+                }, 2000);
             }
-
-            // Continue regular game flow
-            continueGameFlow();
-        }
-        
-        // Function to show surprise message
-        function showSurpriseMessage(surpriseType) {
-            const message = document.createElement('div');
-            message.classList.add('surprise-message');
-            message.textContent = surpriseMessages[surpriseType];
-            document.body.appendChild(message);
             
-            // Remove message after 1.5 seconds
-            setTimeout(() => {
-                document.body.removeChild(message);
-            }, 1500);
-        }
-        
-        // Function to apply surprise effect
-        function applySurpriseEffect(surpriseType, cellIndex) {
-            switch (surpriseType) {
-                case 'extraTurn':
-                    // Current player gets another turn
-                    gameInfo.textContent = `🎁 Player ${currentPlayer} gets an extra turn!`;
-                    continueGameFlow(true); // Keep same player
-                    break;
-                
-                case 'skipTurn':
-                    // Skip next player's turn
-                    const skippedPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    gameInfo.textContent = `⏭️ Player ${skippedPlayer}'s turn is skipped!`;
-                    continueGameFlow(true); // Keep same player
-                    break;
-                
-                case 'switchPlaces':
-                    // Randomly switch two pieces on the board
-                    const filledCells = [];
-                    for (let i = 0; i < gameBoard.length; i++) {
-                        if (gameBoard[i] !== '' && i !== cellIndex) {
-                            filledCells.push(i);
+            executePowerUp(type, gameEngine) {
+                switch (type) {
+                    case 'extra-turn':
+                        // Don't switch players - current player gets another turn
+                        gameEngine.extraTurnActive = true;
+                        break;
+                        
+                    case 'skip-turn':
+                        // Force opponent to skip their next turn
+                        gameEngine.skipNextTurn = true;
+                        break;
+                        
+                    case 'switch-places':
+                        this.switchRandomPieces(gameEngine);
+                        break;
+                        
+                    case 'remove-opponent':
+                        this.removeRandomOpponentPiece(gameEngine);
+                        break;
+                        
+                    case 'safe-spot':
+                        // Mark the current position as safe
+                        const lastMoveIndex = gameEngine.lastMoveIndex;
+                        if (lastMoveIndex !== undefined) {
+                            gameEngine.safeSpots.add(lastMoveIndex);
+                            const cell = document.querySelector(`[data-index="${lastMoveIndex}"]`);
+                            cell.classList.add('safe-spot');
                         }
-                    }
-                    
-                    if (filledCells.length > 0) {
-                        const randomCellIndex = filledCells[Math.floor(Math.random() * filledCells.length)];
-                        const randomCell = document.querySelector(`.cell[data-index="${randomCellIndex}"]`);
+                        break;
                         
-                        // Swap the cell contents
-                        const tempSymbol = gameBoard[randomCellIndex];
-                        gameBoard[randomCellIndex] = currentPlayer;
-                        gameBoard[cellIndex] = tempSymbol;
+                    case 'speed-boost':
+                        gameEngine.timeLeft += 10;
+                        gameEngine.updateTimerDisplay();
+                        break;
                         
-                        // Update display
-                        randomCell.textContent = currentPlayer;
-                        randomCell.className = 'cell ' + currentPlayer.toLowerCase();
+                    case 'time-freeze':
+                        this.freezeTimer(gameEngine);
+                        break;
                         
-                        const currentCell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
-                        currentCell.textContent = tempSymbol;
-                        currentCell.className = 'cell ' + tempSymbol.toLowerCase();
-                        
-                        gameInfo.textContent = `🔄 Pieces switched!`;
-                    }
-                    
-                    setTimeout(() => {
-                        continueGameFlow();
-                    }, 1000);
-                    break;
-                
-                case 'removeOpponent':
-                    // Remove a random opponent's mark
-                    const opponentSymbol = currentPlayer === 'X' ? 'O' : 'X';
-                    const opponentCells = [];
-                    for (let i = 0; i < gameBoard.length; i++) {
-                        if (gameBoard[i] === opponentSymbol) {
-                            opponentCells.push(i);
-                        }
-                    }
-                    
-                    if (opponentCells.length > 0) {
-                        const randomOpponentCellIndex = opponentCells[Math.floor(Math.random() * opponentCells.length)];
-                        gameBoard[randomOpponentCellIndex] = '';
-                        
-                        // Update display
-                        const cellToRemove = document.querySelector(`.cell[data-index="${randomOpponentCellIndex}"]`);
-                        cellToRemove.textContent = '';
-                        cellToRemove.className = 'cell';
-                        
-                        gameInfo.textContent = `❌ Removed an opponent's mark!`;
-                    }
-                    
-                    setTimeout(() => {
-                        continueGameFlow();
-                    }, 1000);
-                    break;
-                
-                case 'safeSpot':
-                    // This cell can't be switched or removed
-                    gameInfo.textContent = `🛡️ This spot is now protected!`;
-                    continueGameFlow();
-                    break;
-                
-                case 'speedBoost':
-                    // Add 10 seconds to the timer permanently
-                    timeLeft += 10;
-                    updateTimerDisplay();
-                    // Remove warning class if we're back above 10 seconds
-                    if (timeLeft > 10) {
-                        timerElement.classList.remove('warning');
-                    }
-                    gameInfo.textContent = `⚡ 10 seconds added to the timer!`;
-                    continueGameFlow();
-                    break;
-                
-                case 'timeFreeze':
-                    // Pause the timer for 5 seconds
-                    clearInterval(timerInterval);
-                    gameInfo.textContent = `❄️ Timer frozen for 5 seconds!`;
-                    
-                    setTimeout(() => {
-                        // Resume timer after 5 seconds
-                        timerInterval = setInterval(() => {
-                            timeLeft--;
-                            updateTimerDisplay();
-                            
-                            if (timeLeft <= 10) {
-                                timerElement.classList.add('warning');
-                            }
-                            
-                            if (timeLeft <= 0) {
-                                clearInterval(timerInterval);
-                                endGameWithTimeOut();
-                            }
-                        }, 1000);
-                        
-                        continueGameFlow();
-                    }, 5000);
-                    break;
-                
-                case 'colorSwap':
-                    // Swap X and O colors temporarily
-                    const style = document.createElement('style');
-                    style.innerHTML = `
-                        .x { color: #ff1493 !important; }
-                        .o { color: #ff69b4 !important; }
-                    `;
-                    document.head.appendChild(style);
-                    
-                    gameInfo.textContent = `🎨 Colors swapped!`;
-                    
-                    setTimeout(() => {
-                        document.head.removeChild(style);
-                        continueGameFlow();
-                    }, 5000);
-                    break;
-                
-                default:
-                    continueGameFlow();
-                    break;
-            }
-        }
-        
-        // Continue normal game flow
-        function continueGameFlow(keepSamePlayer = false) {
-            // Check for win or draw
-            if (checkWin()) {
-                gameActive = false;
-                clearInterval(timerInterval);
-                winMessage.textContent = `Player ${currentPlayer} wins! 🎉`;
-                gameInfo.textContent = '';
-                createConfetti();
-                return;
-            }
-
-            if (checkDraw()) {
-                gameActive = false;
-                clearInterval(timerInterval);
-                winMessage.textContent = "It's a draw! 🤝";
-                gameInfo.textContent = '';
-                return;
-            }
-
-            // Switch player unless specified to keep the same player
-            if (!keepSamePlayer) {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            }
-            gameInfo.textContent = `Player ${currentPlayer}'s turn`;
-        }
-
-        // Function to check for 4 in a row in any direction
-        function checkWin() {
-            const size = 5; // 5x5 grid
-            const winLength = 4; // Need 4 in a row to win
-            
-            // Check for winner
-            for (let row = 0; row < size; row++) {
-                for (let col = 0; col < size; col++) {
-                    const index = row * size + col;
-                    const currentSymbol = gameBoard[index];
-                    
-                    if (!currentSymbol) continue; // Skip empty cells
-                    
-                    // Check right (horizontal)
-                    if (col <= size - winLength) {
-                        let horizontal = true;
-                        let indices = [index];
-                        
-                        for (let i = 1; i < winLength; i++) {
-                            indices.push(index + i);
-                            if (gameBoard[index + i] !== currentSymbol) {
-                                horizontal = false;
-                                break;
-                            }
-                        }
-                        
-                        if (horizontal) {
-                            highlightWinningCells(indices);
-                            return true;
-                        }
-                    }
-                    
-                    // Check down (vertical)
-                    if (row <= size - winLength) {
-                        let vertical = true;
-                        let indices = [index];
-                        
-                        for (let i = 1; i < winLength; i++) {
-                            indices.push(index + i * size);
-                            if (gameBoard[index + i * size] !== currentSymbol) {
-                                vertical = false;
-                                break;
-                            }
-                        }
-                        
-                        if (vertical) {
-                            highlightWinningCells(indices);
-                            return true;
-                        }
-                    }
-                    
-                    // Check diagonal down-right
-                    if (row <= size - winLength && col <= size - winLength) {
-                        let diagonal = true;
-                        let indices = [index];
-                        
-                        for (let i = 1; i < winLength; i++) {
-                            indices.push(index + i * size + i);
-                            if (gameBoard[index + i * size + i] !== currentSymbol) {
-                                diagonal = false;
-                                break;
-                            }
-                        }
-                        
-                        if (diagonal) {
-                            highlightWinningCells(indices);
-                            return true;
-                        }
-                    }
-                    
-                    // Check diagonal down-left
-                    if (row <= size - winLength && col >= winLength - 1) {
-                        let diagonal = true;
-                        let indices = [index];
-                        
-                        for (let i = 1; i < winLength; i++) {
-                            indices.push(index + i * size - i);
-                            if (gameBoard[index + i * size - i] !== currentSymbol) {
-                                diagonal = false;
-                                break;
-                            }
-                        }
-                        
-                        if (diagonal) {
-                            highlightWinningCells(indices);
-                            return true;
-                        }
-                    }
+                    case 'color-swap':
+                        this.swapColors(gameEngine);
+                        break;
                 }
             }
             
-            return false;
+            switchRandomPieces(gameEngine) {
+                const currentPlayer = gameEngine.currentPlayer;
+                const opponentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                
+                // Find all opponent pieces
+                const opponentPieces = [];
+                gameEngine.board.forEach((cell, index) => {
+                    if (cell === opponentPlayer && !gameEngine.safeSpots.has(index)) {
+                        opponentPieces.push(index);
+                    }
+                });
+                
+                if (opponentPieces.length > 0 && gameEngine.lastMoveIndex !== undefined) {
+                    const randomOpponentIndex = opponentPieces[Math.floor(Math.random() * opponentPieces.length)];
+                    const currentPieceIndex = gameEngine.lastMoveIndex;
+                    
+                    // Swap the pieces
+                    gameEngine.board[randomOpponentIndex] = currentPlayer;
+                    gameEngine.board[currentPieceIndex] = opponentPlayer;
+                    
+                    // Update visuals
+                    gameEngine.updateCell(randomOpponentIndex, currentPlayer);
+                    gameEngine.updateCell(currentPieceIndex, opponentPlayer);
+                }
+            }
+            
+            removeRandomOpponentPiece(gameEngine) {
+                const currentPlayer = gameEngine.currentPlayer;
+                const opponentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                
+                // Find all opponent pieces that aren't safe
+                const opponentPieces = [];
+                gameEngine.board.forEach((cell, index) => {
+                    if (cell === opponentPlayer && !gameEngine.safeSpots.has(index)) {
+                        opponentPieces.push(index);
+                    }
+                });
+                
+                if (opponentPieces.length > 0) {
+                    const randomIndex = opponentPieces[Math.floor(Math.random() * opponentPieces.length)];
+                    gameEngine.board[randomIndex] = null;
+                    
+                    const cell = document.querySelector(`[data-index="${randomIndex}"]`);
+                    cell.textContent = '';
+                    cell.style.color = '';
+                    cell.classList.remove('safe-spot');
+                }
+            }
+            
+            freezeTimer(gameEngine) {
+                if (gameEngine.timer) {
+                    clearInterval(gameEngine.timer);
+                    gameEngine.timer = null;
+                    
+                    // Add visual freeze effect
+                    const timerElement = document.querySelector('.timer');
+                    timerElement.classList.add('frozen');
+                    timerElement.style.background = 'linear-gradient(45deg, #87ceeb, #add8e6)';
+                    timerElement.style.padding = '8px 16px';
+                    timerElement.style.borderRadius = '12px';
+                    timerElement.style.boxShadow = '0 0 15px rgba(135, 206, 235, 0.6)';
+                    
+                    // Resume after 5 seconds
+                    setTimeout(() => {
+                        timerElement.classList.remove('frozen');
+                        timerElement.style.background = '';
+                        timerElement.style.padding = '';
+                        timerElement.style.borderRadius = '';
+                        timerElement.style.boxShadow = '';
+                        
+                        if (gameEngine.gameActive && !gameEngine.timer) {
+                            gameEngine.timer = setInterval(() => {
+                                gameEngine.timeLeft--;
+                                gameEngine.updateTimerDisplay();
+                                
+                                if (gameEngine.timeLeft <= 10) {
+                                    timerElement.classList.add('warning');
+                                }
+                                
+                                if (gameEngine.timeLeft <= 0) {
+                                    gameEngine.handleTimeout();
+                                }
+                            }, 1000);
+                        }
+                    }, 5000);
+                }
+            }
+            
+            swapColors(gameEngine) {
+                // Add glow effect to all cells during color swap
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.classList.add('color-swapping');
+                    
+                    const currentColor = cell.style.color;
+                    if (currentColor === 'rgb(255, 20, 147)') { // #ff1493 (X)
+                        cell.style.color = '#4169e1'; // Blue (O)
+                    } else if (currentColor === 'rgb(65, 105, 225)') { // #4169e1 (O)
+                        cell.style.color = '#ff1493'; // Pink (X)
+                    }
+                });
+                
+                // Remove glow effect after short time
+                setTimeout(() => {
+                    document.querySelectorAll('.cell').forEach(cell => {
+                        cell.classList.remove('color-swapping');
+                    });
+                }, 500);
+                
+                // Revert colors after 5 seconds
+                setTimeout(() => {
+                    gameEngine.board.forEach((player, index) => {
+                        if (player) {
+                            gameEngine.updateCell(index, player);
+                        }
+                    });
+                }, 5000);
+            }
+        }
+
+        class GameEngine {
+            constructor(options = {}) {
+                this.board = new Array(25).fill(null);
+                this.currentPlayer = 'X';
+                this.gameActive = true;
+                this.timeLeft = 60;
+                this.timer = null;
+                this.gameStarted = false;
+                this.lastMoveIndex = undefined;
+                this.safeSpots = new Set();
+                this.extraTurnActive = false;
+                this.skipNextTurn = false;
+                this.surprisesEnabled = options.surprisesEnabled !== false; // Default to enabled
+                
+                this.surpriseManager = new SurpriseManager();
+                if (this.surprisesEnabled) {
+                    this.surpriseManager.generateSurprises();
+                } else {
+                    this.surpriseManager.surprises = []; // No surprises
+                }
+                
+                this.initializeUI();
+                this.setupEventListeners();
+            }
+            
+            initializeUI() {
+                this.updatePlayerDisplay();
+                this.updateTimerDisplay();
+            }
+            
+            setupEventListeners() {
+                // Enhanced touch and click events for cells
+                document.querySelectorAll('.cell').forEach((cell, index) => {
+                    // Primary touch event
+                    cell.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.handleCellTouch(index, cell);
+                    }, { passive: false });
+                    
+                    // Fallback click event for desktop
+                    cell.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.makeMove(index);
+                    });
+                    
+                    // Keyboard navigation support
+                    cell.addEventListener('keydown', (e) => {
+                        this.handleKeyboardNavigation(e, index);
+                    });
+                    
+                    // Prevent context menu on long press
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                    });
+                });
+                
+                // Enhanced touch events for reset button
+                const resetBtn = document.querySelector('.reset-btn');
+                resetBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.resetGame();
+                }, { passive: false });
+                
+                resetBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.resetGame();
+                });
+                
+                resetBtn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.resetGame();
+                    }
+                });
+                
+                // Prevent zoom on double tap
+                document.addEventListener('touchstart', (e) => {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', (e) => {
+                    const now = (new Date()).getTime();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, { passive: false });
+            }
+            
+            handleKeyboardNavigation(e, currentIndex) {
+                const cells = document.querySelectorAll('.cell');
+                let nextIndex = currentIndex;
+                
+                switch (e.key) {
+                    case 'Enter':
+                    case ' ':
+                        e.preventDefault();
+                        this.makeMove(currentIndex);
+                        break;
+                        
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        nextIndex = currentIndex - 5;
+                        if (nextIndex >= 0) {
+                            cells[nextIndex].focus();
+                        }
+                        break;
+                        
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        nextIndex = currentIndex + 5;
+                        if (nextIndex < 25) {
+                            cells[nextIndex].focus();
+                        }
+                        break;
+                        
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        nextIndex = currentIndex - 1;
+                        if (nextIndex >= 0 && Math.floor(nextIndex / 5) === Math.floor(currentIndex / 5)) {
+                            cells[nextIndex].focus();
+                        }
+                        break;
+                        
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        nextIndex = currentIndex + 1;
+                        if (nextIndex < 25 && Math.floor(nextIndex / 5) === Math.floor(currentIndex / 5)) {
+                            cells[nextIndex].focus();
+                        }
+                        break;
+                        
+                    case 'Home':
+                        e.preventDefault();
+                        cells[0].focus();
+                        break;
+                        
+                    case 'End':
+                        e.preventDefault();
+                        cells[24].focus();
+                        break;
+                }
+            }
+            
+            handleCellTouch(index, cell) {
+                // Add immediate visual feedback
+                cell.style.transform = 'scale(0.92)';
+                
+                // Restore after short delay
+                setTimeout(() => {
+                    cell.style.transform = '';
+                }, 150);
+                
+                // Make the move
+                this.makeMove(index);
+            }
+            
+            startTimer() {
+                if (this.gameStarted) return;
+                this.gameStarted = true;
+                
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateTimerDisplay();
+                    
+                    if (this.timeLeft <= 10) {
+                        document.querySelector('.timer').style.color = '#ff0000';
+                        document.querySelector('.timer').style.animation = 'pulse 1s infinite';
+                    }
+                    
+                    if (this.timeLeft <= 0) {
+                        this.handleTimeout();
+                    }
+                }, 1000);
+            }
+            
+            makeMove(index) {
+                if (!this.gameActive || this.board[index] !== null) {
+                    return;
+                }
+                
+                // Handle skip turn effect
+                if (this.skipNextTurn) {
+                    this.skipNextTurn = false;
+                    this.updatePlayerDisplay();
+                    return;
+                }
+                
+                if (!this.gameStarted) {
+                    this.startTimer();
+                }
+                
+                // Store last move for power-ups
+                this.lastMoveIndex = index;
+                
+                // Place piece
+                this.board[index] = this.currentPlayer;
+                this.updateCell(index, this.currentPlayer);
+                
+                // Check for surprise at this position
+                const surprise = this.surpriseManager.revealSurpriseAt(index);
+                if (surprise) {
+                    // Add visual effects
+                    const cell = document.querySelector(`[data-index="${index}"]`);
+                    cell.classList.add('surprise-revealed');
+                    
+                    // Show popup
+                    this.surpriseManager.showSurprisePopup(surprise);
+                    
+                    // Execute power-up effect
+                    this.surpriseManager.executePowerUp(surprise.type, this);
+                }
+                
+                // Check for win
+                const winner = this.checkWin();
+                if (winner) {
+                    this.endGame(winner);
+                    return;
+                }
+                
+                // Check for tie
+                if (this.isBoardFull()) {
+                    this.endGame('tie');
+                    return;
+                }
+                
+                // Handle extra turn effect
+                if (this.extraTurnActive) {
+                    this.extraTurnActive = false;
+                    // Don't switch players
+                    return;
+                }
+                
+                // Switch players
+                this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
+                this.updatePlayerDisplay();
+            }
+            
+            checkWin() {
+                const size = 5;
+                const winLength = 4;
+                
+                // Check all possible 4-in-a-row combinations
+                for (let row = 0; row < size; row++) {
+                    for (let col = 0; col < size; col++) {
+                        const index = row * size + col;
+                        const player = this.board[index];
+                        
+                        if (!player) continue;
+                        
+                        // Check horizontal (right)
+                        if (col <= size - winLength) {
+                            let count = 0;
+                            for (let i = 0; i < winLength; i++) {
+                                if (this.board[row * size + col + i] === player) {
+                                    count++;
+                                }
+                            }
+                            if (count === winLength) return player;
+                        }
+                        
+                        // Check vertical (down)
+                        if (row <= size - winLength) {
+                            let count = 0;
+                            for (let i = 0; i < winLength; i++) {
+                                if (this.board[(row + i) * size + col] === player) {
+                                    count++;
+                                }
+                            }
+                            if (count === winLength) return player;
+                        }
+                        
+                        // Check diagonal (down-right)
+                        if (row <= size - winLength && col <= size - winLength) {
+                            let count = 0;
+                            for (let i = 0; i < winLength; i++) {
+                                if (this.board[(row + i) * size + col + i] === player) {
+                                    count++;
+                                }
+                            }
+                            if (count === winLength) return player;
+                        }
+                        
+                        // Check diagonal (down-left)
+                        if (row <= size - winLength && col >= winLength - 1) {
+                            let count = 0;
+                            for (let i = 0; i < winLength; i++) {
+                                if (this.board[(row + i) * size + col - i] === player) {
+                                    count++;
+                                }
+                            }
+                            if (count === winLength) return player;
+                        }
+                    }
+                }
+                
+                return null;
+            }
+            
+            isBoardFull() {
+                return this.board.every(cell => cell !== null);
+            }
+            
+            handleTimeout() {
+                this.stopTimer();
+                const winner = this.getTimeoutWinner();
+                this.endGame(winner);
+            }
+            
+            getTimeoutWinner() {
+                const counts = this.countPieces();
+                if (counts.X > counts.O) {
+                    return 'X';
+                } else if (counts.O > counts.X) {
+                    return 'O';
+                } else {
+                    return 'tie';
+                }
+            }
+            
+            countPieces() {
+                const counts = { X: 0, O: 0 };
+                this.board.forEach(cell => {
+                    if (cell) counts[cell]++;
+                });
+                return counts;
+            }
+            
+            endGame(result) {
+                this.gameActive = false;
+                this.stopTimer();
+                
+                let message;
+                if (result === 'tie') {
+                    message = "It's a tie!";
+                } else if (result === 'timeout') {
+                    const counts = this.countPieces();
+                    if (counts.X > counts.O) {
+                        message = "Time's up! Player X wins with more pieces!";
+                        result = 'X';
+                    } else if (counts.O > counts.X) {
+                        message = "Time's up! Player O wins with more pieces!";
+                        result = 'O';
+                    } else {
+                        message = "Time's up! It's a tie!";
+                        result = 'tie';
+                    }
+                } else {
+                    message = `Player ${result} wins!`;
+                    // Highlight winning cells
+                    this.highlightWinningCells(result);
+                }
+                
+                // Show animated win message instead of alert
+                this.showWinMessage(message);
+                
+                // Trigger confetti for wins (not ties)
+                if (result !== 'tie') {
+                    this.createConfetti();
+                }
+                
+                document.querySelector('.current-player').textContent = message;
+            }
+            
+            showWinMessage(message) {
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'popup-overlay';
+                
+                // Create win message
+                const winMessage = document.createElement('div');
+                winMessage.className = 'win-message';
+                winMessage.textContent = message;
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(winMessage);
+                
+                // Auto-remove after 4 seconds
+                setTimeout(() => {
+                    overlay.remove();
+                    winMessage.remove();
+                }, 4000);
+            }
+            
+            highlightWinningCells(winner) {
+                const winningLine = this.getWinningLine(winner);
+                if (winningLine) {
+                    winningLine.forEach(index => {
+                        const cell = document.querySelector(`[data-index="${index}"]`);
+                        cell.classList.add('winning');
+                    });
+                }
+            }
+            
+            getWinningLine(player) {
+                const size = 5;
+                const winLength = 4;
+                
+                // Check all possible 4-in-a-row combinations
+                for (let row = 0; row < size; row++) {
+                    for (let col = 0; col < size; col++) {
+                        const index = row * size + col;
+                        if (this.board[index] !== player) continue;
+                        
+                        // Check horizontal
+                        if (col <= size - winLength) {
+                            const line = [];
+                            for (let i = 0; i < winLength; i++) {
+                                const checkIndex = row * size + col + i;
+                                if (this.board[checkIndex] === player) {
+                                    line.push(checkIndex);
+                                }
+                            }
+                            if (line.length === winLength) return line;
+                        }
+                        
+                        // Check vertical
+                        if (row <= size - winLength) {
+                            const line = [];
+                            for (let i = 0; i < winLength; i++) {
+                                const checkIndex = (row + i) * size + col;
+                                if (this.board[checkIndex] === player) {
+                                    line.push(checkIndex);
+                                }
+                            }
+                            if (line.length === winLength) return line;
+                        }
+                        
+                        // Check diagonal (down-right)
+                        if (row <= size - winLength && col <= size - winLength) {
+                            const line = [];
+                            for (let i = 0; i < winLength; i++) {
+                                const checkIndex = (row + i) * size + col + i;
+                                if (this.board[checkIndex] === player) {
+                                    line.push(checkIndex);
+                                }
+                            }
+                            if (line.length === winLength) return line;
+                        }
+                        
+                        // Check diagonal (down-left)
+                        if (row <= size - winLength && col >= winLength - 1) {
+                            const line = [];
+                            for (let i = 0; i < winLength; i++) {
+                                const checkIndex = (row + i) * size + col - i;
+                                if (this.board[checkIndex] === player) {
+                                    line.push(checkIndex);
+                                }
+                            }
+                            if (line.length === winLength) return line;
+                        }
+                    }
+                }
+                return null;
+            }
+            
+            createConfetti() {
+                const colors = ['#ff69b4', '#ff1493', '#ffd700', '#32cd32', '#00bfff'];
+                const confettiCount = 50;
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                        confetti.style.animationDelay = Math.random() * 2 + 's';
+                        confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+                        
+                        document.body.appendChild(confetti);
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 5000);
+                    }, i * 100);
+                }
+            }
+            
+            stopTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+            
+            updateCell(index, player) {
+                const cell = document.querySelector(`[data-index="${index}"]`);
+                cell.textContent = player;
+                cell.style.color = player === 'X' ? '#ff1493' : '#4169e1';
+                
+                // Update ARIA label for accessibility
+                const row = Math.floor(index / 5) + 1;
+                const col = (index % 5) + 1;
+                const originalLabel = `Cell ${index + 1} (row ${row}, column ${col})`;
+                cell.setAttribute('aria-label', `${originalLabel} - ${player === 'X' ? 'X piece' : 'O piece'}`);
+                
+                // Add piece placement animation
+                cell.classList.add('placing');
+                setTimeout(() => {
+                    cell.classList.remove('placing');
+                }, 400);
+            }
+            
+            updatePlayerDisplay() {
+                const display = document.querySelector('.current-player');
+                if (this.gameActive) {
+                    display.textContent = `Player ${this.currentPlayer}'s turn`;
+                }
+            }
+            
+            updateTimerDisplay() {
+                const timerElement = document.querySelector('.timer');
+                timerElement.textContent = this.timeLeft;
+                
+                if (this.timeLeft <= 10) {
+                    timerElement.classList.add('warning');
+                    timerElement.style.color = '#ff0000';
+                } else {
+                    timerElement.classList.remove('warning');
+                    timerElement.style.color = '#ff69b4';
+                }
+            }
+            
+            resetGame() {
+                this.stopTimer();
+                this.board = new Array(25).fill(null);
+                this.currentPlayer = 'X';
+                this.gameActive = true;
+                this.timeLeft = 60;
+                this.gameStarted = false;
+                this.lastMoveIndex = undefined;
+                this.safeSpots.clear();
+                this.extraTurnActive = false;
+                this.skipNextTurn = false;
+                
+                // Generate new surprises
+                this.surpriseManager.generateSurprises();
+                
+                // Reset UI and clear all animations
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.style.color = '';
+                    cell.style.transform = '';
+                    cell.style.boxShadow = '';
+                    cell.className = 'cell';
+                });
+                
+                const timerElement = document.querySelector('.timer');
+                timerElement.classList.remove('warning', 'frozen');
+                timerElement.style.color = '#ff69b4';
+                timerElement.style.animation = '';
+                timerElement.style.background = '';
+                timerElement.style.padding = '';
+                timerElement.style.borderRadius = '';
+                timerElement.style.boxShadow = '';
+                
+                // Remove any lingering popups or confetti
+                document.querySelectorAll('.confetti, .win-message, .popup-overlay').forEach(el => {
+                    el.remove();
+                });
+                
+                this.updatePlayerDisplay();
+                this.updateTimerDisplay();
+            }
         }
         
-        // Function to highlight winning cells
-        function highlightWinningCells(indices) {
-            const cells = document.querySelectorAll('.cell');
-            indices.forEach(index => {
-                cells[index].style.backgroundColor = '#d4fc79';
+        // Register Service Worker for offline capability
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
             });
         }
-
-        // Function to check for a draw
-        function checkDraw() {
-            return !gameBoard.includes('');
-        }
-
-        // Function to create confetti
-        function createConfetti() {
-            confettiContainer.innerHTML = '';
-            const colors = ['#ff69b4', '#ff1493', '#48dbfb', '#ffd700', '#32ff7e', '#7d5fff'];
-            
-            for (let i = 0; i < 200; i++) {
-                const confetti = document.createElement('div');
-                confetti.classList.add('confetti-piece');
-                
-                // Random styling
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.width = (Math.random() * 10 + 5) + 'px';
-                confetti.style.height = (Math.random() * 10 + 5) + 'px';
-                confetti.style.opacity = Math.random() + 0.5;
-                
-                // Random animation
-                const animationDuration = (Math.random() * 3 + 2) + 's';
-                const animationDelay = (Math.random() * 2) + 's';
-                
-                confetti.style.animation = `fall ${animationDuration} ease-in infinite`;
-                confetti.style.animationDelay = animationDelay;
-                
-                confettiContainer.appendChild(confetti);
-            }
-            
-            // Add keyframe animation
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes fall {
-                    0% { transform: translateY(0) rotate(0deg); }
-                    100% { transform: translateY(100vh) rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Function to reset the game
-        function resetGame() {
-            currentPlayer = 'X';
-            gameBoard = Array(25).fill('');
-            gameActive = true;
-            winMessage.textContent = '';
-            gameInfo.textContent = `Player ${currentPlayer}'s turn`;
-            confettiContainer.innerHTML = '';
-            timerElement.classList.remove('warning');
-            
-            // Reinitialize the board with new surprises
-            initializeBoard();
-        }
-
-        // Add event listener to reset button
-        resetButton.addEventListener('click', resetGame);
         
-        // Initialize the game
-        initializeBoard();
+        // Initialize game
+        // Check URL params for testing options
+        const urlParams = new URLSearchParams(window.location.search);
+        const noSurprises = urlParams.get('noSurprises') === 'true';
+        
+        const gameOptions = noSurprises ? { surprisesEnabled: false } : {};
+        const game = new GameEngine(gameOptions);
+        
+        // Make game globally accessible for debugging
+        window.game = game;
     </script>
 </body>
 </html>
